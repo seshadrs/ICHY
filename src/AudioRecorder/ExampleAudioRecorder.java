@@ -4,9 +4,10 @@
  * SOURCE: http://www.java-tips.org/java-se-tips/javax.sound/capturing-audio-with-java-sound-api.html
  * 
  * SETTING:
- * sampleRate = 16000;
+   sampleRate = 16000;
    sampleSizeInBits = 16;
    channels = 1;
+   
  * */
 
 package AudioRecorder;

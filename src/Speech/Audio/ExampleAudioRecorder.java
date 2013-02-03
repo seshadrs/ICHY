@@ -10,7 +10,7 @@
    
  * */
 
-package AudioRecorder;
+package Speech.Audio;
 
 import javax.swing.*;
 import java.awt.*;

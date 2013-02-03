@@ -1,6 +1,7 @@
 package Speech.Audio;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class EnergyEndpointer {
   
@@ -10,8 +11,9 @@ public class EnergyEndpointer {
   private double level = Double.NEGATIVE_INFINITY;
   private double forgetfactor = 1.5;
   private double adjustment = 0.05;
-  private double threshold = 20;
+  private double threshold = 1;
   private double background;
+  private int backgroundCounter;
   private int lookback = 10;
   
   /* 
@@ -26,6 +28,8 @@ public class EnergyEndpointer {
    */
   public EnergyEndpointer(){
     tracker = new ArrayList<Boolean>();
+    backgroundCounter = 0;
+    background = 0;
   }
   
   /*
@@ -46,9 +50,8 @@ public class EnergyEndpointer {
   public void getBackground(byte buffer[]){
     int frame [] = extractFrame(buffer);
     //double currEnergy;
-    background = getFrameEnergy(frame);
-    System.out.println(frame);
-    System.out.println(background);
+    background += getFrameEnergy(frame);
+    backgroundCounter += 1;
   }
   
   
@@ -60,9 +63,11 @@ public class EnergyEndpointer {
     int frame [] = extractFrame(buffer);
     double currEnergy;
     
-    // if first frame, set level to energy of first frame and return
+    // if first frame, set level to energy of first frame 
+    // and set background to average of background frames
     if (level == Double.NEGATIVE_INFINITY){
       level = getFrameEnergy(frame);
+      background = background / backgroundCounter;
     }
     
     // after certain number of frames, remove old frame
@@ -103,7 +108,7 @@ public class EnergyEndpointer {
     for (int cur : frame){
       energy = energy + Math.pow(cur, 2);
     }
-    energy = 10 * Math.log(energy);
+    energy = 10 * Math.log10(energy);
     return energy;
   }
   

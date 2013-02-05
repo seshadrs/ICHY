@@ -83,7 +83,7 @@ public class BoundedBuffer <Type> {
 		  
 		  public static void main(String[] args)
 		  {
-			  //testing the Bounded buffer class with integers
+			  //testing the Bounded buffer class  
 			  
 			  BoundedBuffer<Integer> b1 = new BoundedBuffer<Integer>(3);
 			  b1.store(2);

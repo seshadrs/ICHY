@@ -3,6 +3,8 @@ package Speech.Audio;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import Speech.Audio.Utils.SignalData;
+
 public class EnergyEndpointer {
   
   /* 
@@ -11,8 +13,8 @@ public class EnergyEndpointer {
   private double level = Double.NEGATIVE_INFINITY;
   private double forgetfactor = 1.5;
   private double adjustment = 0.05;
-  private double threshold = 1;
-  private double background;
+  private double threshold = 0.1;
+  private double background = 100;
   private int backgroundCounter;
   private int lookback = 10;
   
@@ -41,6 +43,9 @@ public class EnergyEndpointer {
     if (tracker.contains(VOICE)){
       return false;
     }
+    
+    System.out.println("WOHOO");
+    
     return true;
   }
   
@@ -48,7 +53,7 @@ public class EnergyEndpointer {
    * Record the background noise level
    */
   public void getBackground(byte buffer[]){
-    int frame [] = extractFrame(buffer);
+    int frame [] = SignalData.toIntArr(buffer);
     //double currEnergy;
     background += getFrameEnergy(frame);
     backgroundCounter += 1;
@@ -60,7 +65,7 @@ public class EnergyEndpointer {
    * Also keeps track of how many frames have been added 
    */
   public void addFrame(byte buffer[]){
-    int frame [] = extractFrame(buffer);
+    int frame [] = SignalData.toIntArr(buffer);
     double currEnergy;
     
     // if first frame, set level to energy of first frame 
@@ -79,26 +84,7 @@ public class EnergyEndpointer {
     tracker.add(classifyFrame(currEnergy));
   }
   
-  /*
-   * Extract samples for the frame from the byte buffer
-   * TODO: put this in utils since we need this for ASR too.
-   */
-  private int [] extractFrame(byte buffer[]){
-    int cur = 0;
-    int idx = 0;
-    int fval = 0;
-    int frame [] = new int[buffer.length/2];
-    while (cur < buffer.length-1){
-      fval = 0;
-      //System.out.println("Fval: \t is "+ String.format("%x", fval));
-      fval  = (buffer[cur+1] << 8) & 0x0000ff00;
-      fval  = fval | buffer[cur];
-      frame[idx] = fval & 0x0000ffff;
-      idx += 1;
-      cur += 2;
-    }
-    return frame;
-  }
+  
   
   /*
    * Calculate the frame energy in decibels

@@ -68,8 +68,9 @@ public class Recorder {
 		          try {
 		        	  
 		        	  boolean begunRecording = false;
+		        	  boolean isEndpoint = false;
 		        	  
-		            while (keepListening) {
+		            while (keepListening && !isEndpoint) {
 		              int count = line.read(buffer, 0, buffer.length);
 		              
 		              if (keepRecording && count>0)
@@ -83,9 +84,12 @@ public class Recorder {
 	            		  		  	{
 	            	  					int j = Math.max(i + frameSampleSize, count);	
 	            	  					byte[] frame = SignalData.extractFrame(buffer, i, j);
-	            	  					boolean isEndpoint = EnergyVAD.speechEndpoint(frame);
+	            	  					isEndpoint = EnergyVAD.speechEndpoint(frame);
 	            	  					if (isEndpoint)
-	            	  						System.out.println("SPEECH ENDPOINT");
+	            	  						{
+	            	  							System.out.println("SPEECH ENDPOINT");
+	            	  							break;
+	            	  						}
 	            	  					data.write(frame, 0, j-i);
 	            	  					i=j;
 	            	  					
@@ -234,7 +238,7 @@ public class Recorder {
 		 System.out.println("Press the enter key to start recording.");
 		 r.waitOnEnter();		//wait for the enter key press
 		 r.startRecording();
-		 final long RECORD_TIME = 5*1000;
+		 final long RECORD_TIME = 8*1000;
 		 
 		 try {
 			Thread.sleep(RECORD_TIME);

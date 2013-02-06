@@ -4,7 +4,7 @@
  * 
  * */
 
-package Speech.Audio;
+package speech.audio;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -22,7 +22,8 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.TargetDataLine;
 
-import Speech.Audio.Utils.SignalData;
+import speech.audio.utils.SignalData;
+
 
 
 

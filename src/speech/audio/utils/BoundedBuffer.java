@@ -4,7 +4,7 @@
  * 
  * */
 
-package Speech.Audio.Utils;
+package speech.audio.utils;
 
 import java.util.*;
 

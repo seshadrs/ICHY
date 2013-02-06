@@ -1,9 +1,10 @@
-package Speech.Audio;
+package speech.audio;
 
 import java.util.ArrayList;
 
-import Speech.Audio.Utils.SignalData;
-import Speech.Audio.Utils.SignalMath;
+import speech.audio.utils.SignalData;
+import speech.audio.utils.SignalMath;
+
 
 
 /*

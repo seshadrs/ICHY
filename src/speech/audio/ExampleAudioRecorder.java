@@ -10,7 +10,7 @@
    
  * */
 
-package Speech.Audio;
+package speech.audio;
 
 import javax.swing.*;
 import java.awt.*;

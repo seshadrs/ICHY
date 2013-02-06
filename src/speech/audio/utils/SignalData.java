@@ -1,4 +1,4 @@
-package Speech.Audio.Utils;
+package speech.audio.utils;
 
 public class SignalData {
 	

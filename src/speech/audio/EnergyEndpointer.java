@@ -1,9 +1,10 @@
-package Speech.Audio;
+package speech.audio;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import Speech.Audio.Utils.SignalData;
+import speech.audio.utils.SignalData;
+
 
 public class EnergyEndpointer {
   

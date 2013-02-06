@@ -53,7 +53,7 @@ public class MFCC
   private Matrix dctMatrix;
   private Matrix melFilterBanks;
   private FFT normalizedPowerFFT;
-
+  
 
   /**
    * Creates a new MFCC object with default window size of 512 for the given
@@ -67,7 +67,7 @@ public class MFCC
    */
   public MFCC(float sampleRate) throws IllegalArgumentException
   {
-    this(sampleRate, 512, 20, true, 20.0, 16000.0, 40);
+    this(sampleRate, 512, 13, true, 50.0, 7000.0, 40);
   }
 
 
@@ -166,6 +166,7 @@ public class MFCC
   }
 
 
+  
   /**
    * Returns the boundaries (start, center, end) of a given number of triangular
    * mel filters at linear scale. Mel-filters are triangular filters on the
@@ -439,16 +440,32 @@ public class MFCC
     if(input == null)
       throw new IllegalArgumentException("input data must not be a null value");
 
-    //check for correct array length
+    /*
+     * //check for correct array length
     if((input.length % hopSize) != 0)
         throw new IllegalArgumentException("Input data must be multiple of hop size (windowSize/2).");
-
+    */
+    
+    int offset = input.length%hopSize;
+    
     //create return array with appropriate size
     double[][] mfcc = new double[(input.length/hopSize)-1][numberCoefficients];
 
     //process each window of this audio segment
-    for(int i = 0, pos = 0; pos < input.length - hopSize; i++, pos+=hopSize)
-      mfcc[i] = processWindow(input, pos);
+    for(int i = 0, pos = 0; pos < input.length - hopSize - offset; i++, pos+=hopSize)
+      { 
+    	mfcc[i] = processWindow(input, pos);
+    	
+//    	for (int j=0; j<20; j++)
+//    		System.out.println(input[j]);
+    	
+//    	try{
+//    	for (int j=0; i<numberCoefficients; j++)
+//    		if (mfcc[i][j]!=0.0)
+//    			System.out.println(mfcc[i][j]);
+//    	}
+//    	catch(Exception e){}
+      }
 
     return mfcc;
   }
@@ -508,16 +525,16 @@ public class MFCC
 
     //apply mel filter banks
     x = melFilterBanks.times(x);
-
+    
+    //x HAS DATA HERE
+    
     //to db
     double log10 = 10 * (1 / Math.log(10)); // log for base 10 and scale by factor 10
-    x.thrunkAtLowerBoundary(1);
+    x.thrunkAtLowerBoundary(0.0);	//OLD: x.thrunkAtLowerBoundary(1);
     x.logEquals();
     x.timesEquals(log10);
-
     //compute DCT
     x = dctMatrix.times(x);
-
     return x.getColumnPackedCopy();
   }
 }

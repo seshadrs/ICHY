@@ -51,6 +51,7 @@ public class MFCC
   private double[] inputData;
   private double[] buffer;
   private Matrix dctMatrix;
+  private Matrix idctMatrix;
   private Matrix melFilterBanks;
   private FFT normalizedPowerFFT;
   
@@ -160,6 +161,7 @@ public class MFCC
     //store filter weights and DCT matrix due to performance reason
     melFilterBanks = getMelFilterBanks();
     dctMatrix = getDCTMatrix();
+    idctMatrix = getIDCTMatrix();
 
     //create power fft object
     normalizedPowerFFT = new FFT(FFT.FFT_NORMALIZED_POWER, windowSize, FFT.WND_HANNING);
@@ -376,6 +378,32 @@ public class MFCC
     return matrix;
   }
 
+  private Matrix getIDCTMatrix()
+  {
+    //compute constants
+    double k = Math.PI/numberCoefficients;
+    double w1 = 1.0/(Math.sqrt(numberCoefficients));//1.0/(Math.sqrt(numberFilters/2));
+    double w2 = Math.sqrt(2.0/numberCoefficients);//Math.sqrt(2.0/numberFilters)*(Math.sqrt(2.0)/2.0);
+
+    //create new matrix
+    Matrix matrix = new Matrix(numberFilters, numberCoefficients);
+
+    //generate dct matrix
+    for(int i = 0; i < numberFilters; i++)
+    {
+      for(int j = 0; j < numberCoefficients; j++)
+      {
+        if(i == 0)
+          matrix.set(i, j, w1 * Math.cos(k*i*(j + 0.5d)));
+        else
+          matrix.set(i, j, w2 * Math.cos(k*i*(j + 0.5d)));
+      }
+    }
+
+    return matrix;
+  }
+  
+  
   /**
    * Performs the transformation of the input data to MFCCs. This is done by
    * splitting the given data into windows and processing each of these windows
@@ -416,7 +444,7 @@ public class MFCC
       samplesRead = in.append(inputData, hopSize, hopSize);
 
       //process the current window
-      mfcc.add(processWindow(inputData, 0));
+      mfcc.add(processWindow(inputData, 0, false));
     }
 
     return mfcc;
@@ -454,7 +482,7 @@ public class MFCC
     //process each window of this audio segment
     for(int i = 0, pos = 0; pos < input.length - hopSize - offset; i++, pos+=hopSize)
       { 
-    	mfcc[i] = processWindow(input, pos);
+    	mfcc[i] = processWindow(input, pos, false);
     	
 //    	for (int j=0; j<20; j++)
 //    		System.out.println(input[j]);
@@ -470,7 +498,43 @@ public class MFCC
     return mfcc;
   }
 
+  public double[][] processLogMel(double[] input) throws IllegalArgumentException, IOException
+  {
+    //check for null
+    if(input == null)
+      throw new IllegalArgumentException("input data must not be a null value");
 
+    /*
+     * //check for correct array length
+    if((input.length % hopSize) != 0)
+        throw new IllegalArgumentException("Input data must be multiple of hop size (windowSize/2).");
+    */
+    
+    int offset = input.length%hopSize;
+    
+    //create return array with appropriate size
+    double[][] logmel = new double[(input.length/hopSize)-1][numberFilters];
+
+    //process each window of this audio segment
+    for(int i = 0, pos = 0; pos < input.length - hopSize - offset; i++, pos+=hopSize)
+      { 
+      logmel[i] = processWindow(input, pos, true);
+      
+//      for (int j=0; j<20; j++)
+//        System.out.println(input[j]);
+      
+//      try{
+//      for (int j=0; i<numberCoefficients; j++)
+//        if (mfcc[i][j]!=0.0)
+//          System.out.println(mfcc[i][j]);
+//      }
+//      catch(Exception e){}
+      }
+
+    return logmel;
+  }
+  
+  
   /**
    * Returns the window size.
    *
@@ -499,7 +563,7 @@ public class MFCC
    * @return double[] the window representation in Sone
    * @throws IllegalArgumentException raised if mehtod contract is violated
    */
-  public double[] processWindow(double[] window, int start) throws IllegalArgumentException
+  public double[] processWindow(double[] window, int start, boolean getLogMel) throws IllegalArgumentException
   {
     //number of unique coefficients, and the rest are symmetrically redundant
     int fftSize = (windowSize / 2) + 1;
@@ -532,9 +596,17 @@ public class MFCC
     double log10 = 10 * (1 / Math.log(10)); // log for base 10 and scale by factor 10
     x.thrunkAtLowerBoundary(0.0);	//OLD: x.thrunkAtLowerBoundary(1);
     x.logEquals();
+    // log Mel scale. Need to store this and plot.
     x.timesEquals(log10);
+    
+    //System.out.println(x.getRowDimension());
+    //System.out.println(x.getColumnDimension());
+    if (getLogMel){
     //compute DCT
-    x = dctMatrix.times(x);
+      x = dctMatrix.times(x);
+      //x = idctMatrix.times(x);
+    }
+    
     return x.getColumnPackedCopy();
   }
 }

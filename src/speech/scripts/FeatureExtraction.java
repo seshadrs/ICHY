@@ -1,6 +1,8 @@
 package speech.scripts;
 
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import speech.audio.feat.MFCC;
 import speech.audio.utils.IO;
@@ -10,31 +12,62 @@ public class FeatureExtraction {
 	
 	 public static void main(String[] args) throws IllegalArgumentException, IOException
 	 {
-		 double[] audioData = IO.read("./rec.wav");
+		 double[] audioData = IO.read("/home/spalkar/Downloads/oneSamp1.wav");
+		 FileWriter outFilelog = new FileWriter("/home/spalkar/workspace/ICHY-output/oneSamp2-40f-mfccinverted.txt");
+		 PrintWriter outflog = new PrintWriter(outFilelog);
+	   FileWriter outFile = new FileWriter("/home/spalkar/workspace/ICHY-output/oneSamp2-40f-mfcc.txt");
+	   PrintWriter outf = new PrintWriter(outFile);
+	   
+	   int nFilters = 40;
 		 
-		 MFCC featExtractor = new MFCC();
+		 //MFCC(float sampleRate, double minFreq, double maxFreq, int numFilters)
+		 MFCC featExtractor = new MFCC(16000, 50, 7000, nFilters);
+		 
+		 double[][] featVectorsLogMel = featExtractor.extractFeaturesLogMel(audioData);
 		 
 		 double[][] featVectors = featExtractor.extractFeatures(audioData);
 		 
-		 System.out.println(audioData.length);
+		 //System.out.println(audioData.length);
+
+		 System.out.println("Log Mel...");
+		 System.out.println(featVectorsLogMel.length);
+     System.out.println(featVectorsLogMel[0].length);
+     System.out.println(featVectorsLogMel[3][5]);    
+     
+     System.out.println("Mel Cepstra...");
 		 System.out.println(featVectors.length);
 		 System.out.println(featVectors[0].length);
-		 
 		 System.out.println(featVectors[3][5]);		 
 		
 		 
-		 for (int i=0; i< featVectors.length; i++)
-			 {for (int j=0; j< 13; j++)
-			 {
-				 try{
-					 double x = featVectors[i][j];
-				 System.out.print(x+" ");}
-				 catch(Exception e)
-				 {}
+		 for (int i=0; i < featVectorsLogMel.length; i++){
+		   for (int j=0; j < featVectorsLogMel[0].length; j++){
+				try{
+					 double x = featVectorsLogMel[i][j];
+					 outflog.print(x+"\t");
+				}catch(Exception e)
+				 {
+					   
+				 }
 			 }
-			 System.out.println();
-			 }
-	 }
+			 outflog.println();
+		 }
+		 outflog.close();
+	 
+   for (int i=0; i < featVectors.length; i++){
+     for (int j=0; j < featVectors[0].length; j++){
+      try{
+         double x = featVectors[i][j];
+         outf.print(x+"\t");
+      }catch(Exception e)
+       {
+           
+       }
+     }
+     outf.println();
+   }
+   outf.close();
+ }
 	
 	
 }

@@ -14,12 +14,26 @@ public class MFCC {
 	
 	public MFCC()
 	{
+	  //MFCC(float sampleRate, int windowSize, int numberCoefficients, boolean useFirstCoefficient, 
+	  //double minFreq, double maxFreq, int numberFilters)
 		extractor = new comirva.audio.util.MFCC(16000);
 	}
 	
-	public double[][] extractFeatures(double[] data) throws IllegalArgumentException, IOException
+	public MFCC(float sampleRate, double minFreq, double maxFreq, int numFilters)
+  {
+    //MFCC(float sampleRate, int windowSize, int numberCoefficients, boolean useFirstCoefficient, 
+    //double minFreq, double maxFreq, int numberFilters)
+    extractor = new comirva.audio.util.MFCC(sampleRate, 512, 13, true, minFreq, maxFreq, numFilters);
+  }
+	
+	public double[][] extractFeaturesLogMel(double[] data) throws IllegalArgumentException, IOException
 	{
-		return extractor.process(data);
+		return extractor.processLogMel(data);
 	}
+	
+	 public double[][] extractFeatures(double[] data) throws IllegalArgumentException, IOException
+	  {
+	    return extractor.process(data);
+	  }
 
 }

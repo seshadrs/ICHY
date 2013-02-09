@@ -1,5 +1,5 @@
 package speech.scripts;
-
+  
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -8,7 +8,7 @@ import speech.audio.feat.MFCC;
 import speech.audio.utils.IO;
 
 public class FeatureExtraction {
-
+ 
 	
 	 public static void main(String[] args) throws IllegalArgumentException, IOException
 	 {

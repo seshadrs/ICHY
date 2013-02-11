@@ -12,11 +12,11 @@ public class FeatureExtraction {
 	
 	 public static void main(String[] args) throws IllegalArgumentException, IOException
 	 {
-		 double[] audioData = IO.read("/home/spalkar/Downloads/oneSamp1.wav");
+		 double[] audioData = IO.read(args[0]); // wav file
 		 
-		 FileWriter outFilelog = new FileWriter("/home/spalkar/workspace/ICHY-output/oneSamp2-40f-logmel.txt");
+		 FileWriter outFilelog = new FileWriter(args[1]); // log spectrum file
 		 PrintWriter outflog = new PrintWriter(outFilelog);
-	   FileWriter outFile = new FileWriter("/home/spalkar/workspace/ICHY-output/oneSamp2-40f-logmfcc.txt");
+	   FileWriter outFile = new FileWriter(args[2]); // mfcc file
 	   PrintWriter outf = new PrintWriter(outFile);
 	   
 	   int nFilters = 40;

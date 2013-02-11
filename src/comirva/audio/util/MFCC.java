@@ -601,7 +601,7 @@ public class MFCC
     
     //System.out.println(x.getRowDimension());
     //System.out.println(x.getColumnDimension());
-    if (getLogMel){
+    if (!getLogMel){
     //compute DCT
       x = dctMatrix.times(x);
       //x = idctMatrix.times(x);

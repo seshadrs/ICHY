@@ -13,9 +13,10 @@ public class FeatureExtraction {
 	 public static void main(String[] args) throws IllegalArgumentException, IOException
 	 {
 		 double[] audioData = IO.read("/home/spalkar/Downloads/oneSamp1.wav");
-		 FileWriter outFilelog = new FileWriter("/home/spalkar/workspace/ICHY-output/oneSamp2-40f-mfccinverted.txt");
+		 
+		 FileWriter outFilelog = new FileWriter("/home/spalkar/workspace/ICHY-output/oneSamp2-40f-logmel.txt");
 		 PrintWriter outflog = new PrintWriter(outFilelog);
-	   FileWriter outFile = new FileWriter("/home/spalkar/workspace/ICHY-output/oneSamp2-40f-mfcc.txt");
+	   FileWriter outFile = new FileWriter("/home/spalkar/workspace/ICHY-output/oneSamp2-40f-logmfcc.txt");
 	   PrintWriter outf = new PrintWriter(outFile);
 	   
 	   int nFilters = 40;
@@ -54,8 +55,8 @@ public class FeatureExtraction {
 		 }
 		 outflog.close();
 	 
-   for (int i=0; i < featVectors.length; i++){
-     for (int j=0; j < featVectors[0].length; j++){
+   for (int j=0; j < featVectors[0].length;j++){
+     for (int i=0; i < featVectors.length; i++){
       try{
          double x = featVectors[i][j];
          outf.print(x+"\t");
@@ -65,6 +66,14 @@ public class FeatureExtraction {
        }
      }
      outf.println();
+   }
+   int y = 0;
+   String s = "";
+   for (int k=0; k < featVectors.length; k++){
+     s = s + y + "\t";
+   }
+   for (int buf=0; buf < 48; buf++){    
+     outf.println(s);
    }
    outf.close();
  }

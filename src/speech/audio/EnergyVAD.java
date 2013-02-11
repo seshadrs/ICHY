@@ -22,9 +22,11 @@ public class EnergyVAD {
 	private static double minSignal = 0;
 	private static double level = 0;
 	private static double averageNumber =1;
-	private static double background = 177;
-	private static double adjustment = 0.003;
-	private static double threshold = 10;
+	private static double adjustment = 0.0025;
+	private static double threshold = 3.5;
+	
+	private static double background = 0;
+	private static int backgroundFrames = 0;
 	
 	/*
 	 * Default parameter to detect endpoint in speech (a heuristic)  
@@ -43,6 +45,7 @@ public class EnergyVAD {
 	
 	private static void initSignalHistory()
 	{
+		background -= 3;		//to account for all the surface noise on the laptop 
 		for(int i=0; i<endpointThreshold-1; i++)
 			signalHistory.add(0,SpeechState.SPEECH);
 	}
@@ -137,6 +140,24 @@ public class EnergyVAD {
     	SpeechState curState = classify(audio);		//gets the speech state for the audio frame
     	 return speechEnd(curState);				//checks whether this state indicates the endpoint of speech input
     }
+    
+    
+    /*
+	 * Frames previous to key-hit are used to model the background energy level
+	 * */
+    public static void modelBackground(byte[] audio)
+    {
+    	float[] data = SignalData.toFloatArr(audio);
+        double currentBGEnergy = SignalMath.logRootMeanSquare(data);
+        background = (background*(double)backgroundFrames + currentBGEnergy)/(double)(backgroundFrames+1);
+        backgroundFrames+=1;
+        System.out.println(background);
+        
+        
+    }
+    
+    
+    
 
 }
 

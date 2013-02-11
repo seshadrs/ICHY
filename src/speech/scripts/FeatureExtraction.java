@@ -14,12 +14,17 @@ public class FeatureExtraction {
 	 {
 		 double[] audioData = IO.read(args[0]); // wav file
 		 
-		 FileWriter outFilelog = new FileWriter(args[1]); // log spectrum file
-		 PrintWriter outflog = new PrintWriter(outFilelog);
-	   FileWriter outFile = new FileWriter(args[2]); // mfcc file
-	   PrintWriter outf = new PrintWriter(outFile);
+		 
 	   
-	   int nFilters = 40;
+	   int[] nFiltersArr = {40,30,25};
+	   
+	   for(int nFilters : nFiltersArr)
+	   {
+		   
+		   FileWriter outFilelog = new FileWriter(args[1]+"_"+ Integer.toString(nFilters)+".mat"); // log spectrum file
+			 PrintWriter outflog = new PrintWriter(outFilelog);
+		   FileWriter outFile = new FileWriter(args[2]+"_"+ Integer.toString(nFilters)+".dat"); // mfcc file
+		   PrintWriter outf = new PrintWriter(outFile);
 		 
 		 //MFCC(float sampleRate, double minFreq, double maxFreq, int numFilters)
 		 MFCC featExtractor = new MFCC(16000, 50, 7000, nFilters);
@@ -76,6 +81,8 @@ public class FeatureExtraction {
      outf.println(s);
    }
    outf.close();
+   
+	   }
  }
 	
 	

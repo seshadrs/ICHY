@@ -11,6 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.Scanner;
 
 import javax.sound.sampled.AudioFileFormat.Type;
@@ -73,6 +74,18 @@ public class Recorder {
 		            while (keepListening && !isEndpoint) {
 		              int count = line.read(buffer, 0, buffer.length);
 		              
+		              if(!keepRecording)	//for VAD to learn background model
+		              {
+		            	  for(int i=0; i<count; i++)
+      		  		  	{
+      	  					int j = Math.max(i + frameSampleSize, count);	
+      	  					byte[] frame = SignalData.extractFrame(buffer, i, j);
+      	  					EnergyVAD.modelBackground(frame);
+      	  					i=j;
+      	  					
+      		  		  	}
+		              }
+		              
 		              if (keepRecording && count>0)
 		            	  {
 	            	  		if (begunRecording)
@@ -106,6 +119,7 @@ public class Recorder {
 		              }
 		            }
 		            data.close();
+		            stopRecording();
 		          } catch (IOException e) {
 		            System.err.println("I/O problems: " + e);
 		            System.exit(-1);
@@ -200,7 +214,7 @@ public class Recorder {
 		 ByteArrayInputStream bais = new ByteArrayInputStream(audioData);
          AudioInputStream outputAIS = new AudioInputStream( bais, getFormat(), (long) audioData.length/2);
 
-         AudioSystem.write(outputAIS, Type.WAVE, new File("./rec.wav"));
+         AudioSystem.write(outputAIS, Type.WAVE, new File("./output/rec.wav"));
 		 return true;
 		 
 	 }
@@ -238,15 +252,24 @@ public class Recorder {
 		 System.out.println("Press the enter key to start recording.");
 		 r.waitOnEnter();		//wait for the enter key press
 		 r.startRecording();
-		 final long RECORD_TIME = 8*1000;
+		 
+		 final long MAX_RECORD_TIME = 20*1000;	//in milliseconds
+		 final long SLEEP_TIME = 500;
+		 long timeSlept = 0;
 		 
 		 try {
-			Thread.sleep(RECORD_TIME);
-		} catch (InterruptedException e) {
+			
+			 while(r.keepListening && timeSlept<= MAX_RECORD_TIME)
+				 {
+				 	Thread.sleep(SLEEP_TIME);
+				 	timeSlept += SLEEP_TIME;
+				 }
+		
+		 } catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	     
-		 r.stopRecording();
+		 r.stopRecording();	//to set the bool vars when max-time out occurs
 		 r.playRecording();
 		 try {
 			r.saveRecording();

@@ -17,3 +17,7 @@ python plt_matrix.py $LOGMEL_MAT_25
 python plt_matrix.py $IDCT_MAT_25
 
 open ../../../output/rec.wav_plot.png ../../../output/logmel_40.mat_plot.png ../../../output/idct_40.mat_plot.png
+
+#open ../../../output/logmel_40.mat_plot.png ../../../output/logmel_30.mat_plot.png ../../../output/logmel_25.mat_plot.png
+
+#open ../../../output/idct_40.mat_plot.png ../../../output/idct_30.mat_plot.png ../../../output/idct_25.mat_plot.png

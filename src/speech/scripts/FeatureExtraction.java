@@ -3,6 +3,8 @@ package speech.scripts;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import speech.audio.feat.MFCC;
 import speech.audio.utils.IO;

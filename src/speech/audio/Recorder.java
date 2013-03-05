@@ -137,7 +137,7 @@ public class Recorder {
 		      System.exit(-2);
 		    }
 		  }
-	 
+	 					
 	 /*
 	  * Starts recording audio
 	  * */
@@ -253,7 +253,7 @@ public class Recorder {
 		 r.waitOnEnter();		//wait for the enter key press
 		 r.startRecording();
 		 
-		 final long MAX_RECORD_TIME = 20*1000;	//in milliseconds
+		 final long MAX_RECORD_TIME = 10*1000;	//in milliseconds
 		 final long SLEEP_TIME = 500;
 		 long timeSlept = 0;
 		 

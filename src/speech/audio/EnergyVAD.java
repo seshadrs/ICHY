@@ -22,7 +22,7 @@ public class EnergyVAD {
 	private static double minSignal = 0;
 	private static double level = 0;
 	private static double averageNumber =1;
-	private static double adjustment = 0.0025;
+	private static double adjustment = 0.003;
 	private static double threshold = 3.5;
 	
 	private static double background = 0;

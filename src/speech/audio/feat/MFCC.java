@@ -35,5 +35,56 @@ public class MFCC {
 	  {
 	    return extractor.process(data);
 	  }
+	 
+	 
+	 //Returns the 13 LogMel features, the velocity and the acceleration of the features.
+	 public double[][] extractAll39Features(double[] data) throws IllegalArgumentException, IOException
+	 {
+		 double[][] logMelVectors = extractor.processLogMel(data);
+		 double[][] allFeats = new double[logMelVectors.length][39];
+		 
+		 double[] velocityVector= new double[13];
+		 double[] prevVelocityVector= new double[13];
+		 double[] accelerationVector= new double[13];
+		 double[] prevLogMelVector = new double[13];
+		
+		 int pos=0;
+		 double velI,accI;
+		 
+		 for(double[] logMelVector : logMelVectors)
+		 {
+			 //enter values into new feat-arr
+			 for(int i=0; i<13;i++)
+				 allFeats[pos][i] = logMelVector[i];
+			 
+			 if(pos>0)	//calculate velocity
+			 {
+				 for(int i=0; i<13;i++)
+					 {
+					 	velI = logMelVector[i]-prevLogMelVector[i];
+					 	allFeats[pos][13+i] = velI;
+					 	velocityVector[i] = velI; 
+					 }
+			 }
+			 
+			 if(pos>1)	//calculate acceleration
+			 {
+				 for(int i=0; i<13;i++)
+					 {
+					 	accI = velocityVector[i]-prevVelocityVector[i];
+					 	allFeats[pos][13*2+i] = accI;
+					 	accelerationVector[i] = accI; 
+					 }
+			 }
+			 
+			 pos+=1;
+			 prevLogMelVector = logMelVector;
+			 prevVelocityVector = velocityVector;
+				 
+			 
+		 }
+		 
+		return allFeats; 
+	 }
 
 }

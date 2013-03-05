@@ -25,6 +25,20 @@ public class SignalData {
 	  }
 
 	  
+	  /* 
+	   * Gets the iTH index array from the 2D array 
+	   * */
+	  public static double[] get(double[][] data, int index)
+	  {
+		  double[] res = new double[data[0].length];
+		  
+		  for(int i=0; i<data[0].length; i++)
+			  res[i] = data[index][i];
+		  
+		  return res;
+	  }
+	  
+	  
 	  /*
 	   * Extract samples for the frame from the byte buffer
 	   * TODO: put this in utils since we need this for ASR too.

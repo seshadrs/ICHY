@@ -1,0 +1,6 @@
+
+For each digit:
+	Get vectors for each template in a 3D matrix (num templates X num frames X feature dim)
+	Send vectors to KMeans for segmentation
+	Send segmented vectors and learnt gaussian states to HMM
+	Learn transition probs and train HMM

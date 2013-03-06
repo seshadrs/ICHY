@@ -42,7 +42,7 @@ public class HMM {
 		finals[numStates-1] = 1;
 		for(int i=0; i<segments.length; i++){
 			int prev = segments[i][0];
-			for (int j=1; j<segments[0].length;j++){
+			for (int j=1; j<segments[i].length;j++){
 				int curr = segments[i][j];
 				transitions[prev][curr] += 1;
 				weights[curr] += 1;
@@ -63,7 +63,7 @@ public class HMM {
 		
 		for(int i=0; i<segments.length; i++){
 			int prev = segments[i][0];
-			for (int j=1; j<segments[0].length;j++){
+			for (int j=1; j<segments[i].length;j++){
 				int curr = segments[i][j];
 				transitions[prev][curr] += 1;
 				weights[curr] += 1;

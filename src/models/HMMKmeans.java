@@ -22,7 +22,7 @@ public class HMMKmeans {
 	}
 	
 	public HMMKmeans(int numStates, int numFeats){
-		System.out.println("In constructor...");
+		System.out.println("Training Digit...");
 		this.features = new ArrayList<Matrix>();
 		this.hmm = new HMM(numStates, numFeats);
 	}
@@ -116,16 +116,17 @@ public class HMMKmeans {
 		double prevErr = 0;
 		double err = meanSampleProb();
 		
-		
+		int iter = 0;
 		// recurse
-		while(Math.abs((err - prevErr)) > convergenceThresh){
-			System.out.println("Prob is: " + err);
+		while((Math.abs((err - prevErr)) > convergenceThresh) && (iter < 5)){
+			//System.out.println("Prob is: " + err);
 			prevErr = err;
 			segment();
 			hmm.update(features, segments);
 			err = meanSampleProb();
+			iter ++;
 		}
-		System.out.println("Prob is: " + err);
+		//System.out.println("Prob is: " + err);
 	}
 	
 	public double getSampleProb(Matrix feats){

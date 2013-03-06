@@ -24,7 +24,7 @@ public class Runner {
 		String fileprefix = "template_";//args[1]; //"template_"
 		int numTemplates = 5;//Integer.parseInt(args[2]); //5
 		MFCC featExtractor = new MFCC(16000, 50, 7000, 40);
-		String [] digits = {"0"};//, "2", "4"};
+		String [] digits = {"0", "1", "2", "3", "4"};
 		ArrayList<HMMKmeans> models = new ArrayList<HMMKmeans>(digits.length);
 		
 		for(String s: digits){
@@ -40,6 +40,9 @@ public class Runner {
 			models.add(segmenter);
 		}
 		
+		System.out.println();
+		System.out.println("TESTING....");
+		System.out.println();
 		//Testing
 		int correct = 0;
 		fileprefix = "test_";
@@ -47,15 +50,15 @@ public class Runner {
 			System.out.println("Testing digit "+s);
 			for(int i=1; i<=numTemplates; i++){
 				System.out.print("\t Sample "+ i + " : ");
-				double maxProb = Double.NEGATIVE_INFINITY;
+				double maxProb = Double.POSITIVE_INFINITY;//Double.NEGATIVE_INFINITY;
 				String pred = "";
 				double[] audioData = IO.read(path+s+"/"+fileprefix+"-"+i+".wav"); // wav file
 				double[][] featVectors = featExtractor.extractAll39Features(audioData);
 				Matrix m = new Matrix(featVectors);
 				for (int k=0; k<models.size(); k++){
-					double prob = models.get(0).getSampleProb(m);
-					System.out.println(prob);
-					if (prob > maxProb){
+					double prob = models.get(k).getSampleProb(m);
+					//System.out.println(prob);
+					if (prob < maxProb){
 						maxProb = prob;
 						pred = digits[k];
 					}

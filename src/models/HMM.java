@@ -58,6 +58,25 @@ public class HMM {
 		
 	}
 	
+	private void updateTransitions(int [][] segments){
+		
+		for(int i=0; i<segments.length; i++){
+			int prev = segments[i][0];
+			for (int j=1; j<segments[0].length;j++){
+				int curr = segments[i][j];
+				transitions[prev][curr] += 1;
+				weights[curr] += 1;
+				prev = curr;
+			}
+		}
+		for(int i=0; i<numStates;i++){
+			weights[i] = weights[i]/totalPoints;
+			for(int j=0; j<numStates;j++){
+				transitions[i][j] = (double)transitions[i][j]/(totalPoints-segments.length);
+			}
+		}
+	}
+	
 	private void updateHMMParams(){
 		double sumi = 0;
 		for (int s=0; s<numStates; s++){
@@ -160,7 +179,7 @@ public class HMM {
 		
 		// Update Gaussians
 		for (int i=0; i<numStates; i++){
-			states[i].setParams(means[i], covars[i], -1);
+			states[i].setParams(means[i], covars[i], weights[i]);
 		}	
 		
 	}
@@ -245,6 +264,7 @@ public class HMM {
 	
 	private void calculateGammas(ArrayList<Matrix> features){
 		for(int i=0;i<alphas.size();i++){
+			System.out.println("Alpha size: "+alphas.size());
 			Matrix alph = alphas.get(i);
 			Matrix beta = betas.get(i);
 			int nFrames = alph.getColumnDimension();
@@ -263,7 +283,7 @@ public class HMM {
 				Matrix sr = new Matrix(numStates, numStates);
 				double tdenom = 0;
 				Double [] vals = new Double [numFeats];
-				for(int j =0; j<numFeats; j++){
+				for(int j =0; j<numFeats ; j++){
 					vals[j] = (Double) features.get(i).get(t+1, j);
 				}
 				for (int s=0; s<numStates; s++){
@@ -305,17 +325,21 @@ public class HMM {
 		clearAll();
 		calculateHMMParams(segments);
 		calculateGaussianParams(features);
-		update(features);
+		update(features, segments);
 	}
 	
-	public void update(ArrayList<Matrix> features){
+	public void update(ArrayList<Matrix> features, int [][] segments){
+		alphas.clear();
+		betas.clear();
+		gammas.clear();
+		tgammas.clear();
 		for(int t=0; t<features.size(); t++){
 			calculateAlphas(features.get(t), false);
 			calculateBetas(features.get(t));
 		}
 		calculateGammas(features);
-		//updateHMMParams();
-		//updateGaussianParams(features);
+		//updateTransitions(segments);
+		updateGaussianParams(features);
 	}
 	
 	public double forwardProb(Matrix sample){

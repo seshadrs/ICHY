@@ -67,20 +67,62 @@ public class HMMKmeans {
 		return prob/features.size();
 	}
 
+	
+	private void segment(){
+		System.out.println("In segment...");
+		double minDist = Integer.MAX_VALUE;
+		int minIdx = 0;
+		int oidx = 0;
+		for(Matrix m : features){
+			for (int i=0; i<m.getRowDimension(); i++){
+				int idx = 0;
+				minDist = Integer.MAX_VALUE;
+				minIdx = 0;
+				Double [] vals = new Double[hmm.numFeats];
+				for (int j=0; j<hmm.numFeats; j++){
+					vals[j] = m.get(i, j);
+				}
+				for (Gaussian state : hmm.states){
+					double dist = getDistance(vals, state);
+					if(dist < minDist){
+						minDist = dist;
+						minIdx = idx;
+					}
+					idx ++;
+				}
+				segments[oidx][i] = minIdx;
+			}
+		oidx ++;
+		}
+	}
+	
+	private double getDistance(Double[] vals, Gaussian clus){
+		double dist = 0;
+		double sumi = 0;
+		dist = -0.5 * Math.log(2*3.14*clus.getDeterminant());
+		for (int i = 0; i < hmm.numFeats; i++){
+			sumi += (Math.pow((vals[i].doubleValue() - clus.getMeans()[i]), 2)/(clus.getCovars()[i]));
+		}
+		dist = dist - 0.5*sumi - Math.log(clus.getWeight());
+		return dist;
+	}
+	
 	public void learnClusters(ArrayList<Matrix> feats){
 	
 		// initialize
 		initialize(feats);
 		double prevErr = 0;
-		//double err = meanSampleProb();
+		double err = meanSampleProb();
 		
-		/*
+		
 		// recurse
 		while(Math.abs((err - prevErr)) > convergenceThresh){
+			System.out.println("Prob is: " + err);
 			prevErr = err;
-			hmm.update(features);
+			segment();
+			hmm.update(features, segments);
 			err = meanSampleProb();
-		}*/
+		}
 	}
 	
 	public double getSampleProb(Matrix feats){

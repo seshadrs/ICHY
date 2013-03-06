@@ -32,7 +32,7 @@ public class HMMKmeans {
 		int start = 0;
 		int end = 0;
 		totalPoints = 0;
-		System.out.println("In initialize...");
+		//System.out.println("In initialize...");
 		segments = new int[feats.size()][];
 		int oidx = 0;
 		for(Matrix m : feats){
@@ -69,12 +69,14 @@ public class HMMKmeans {
 
 	
 	private void segment(){
-		System.out.println("In segment...");
+		//System.out.println("In segment...");
 		double minDist = Integer.MAX_VALUE;
 		int minIdx = 0;
 		int oidx = 0;
 		for(Matrix m : features){
-			for (int i=0; i<m.getRowDimension(); i++){
+			segments[oidx][0] = 0;
+			segments[oidx][m.getRowDimension()-1] = hmm.numStates-1;
+			for (int i=1; i<m.getRowDimension()-1; i++){
 				int idx = 0;
 				minDist = Integer.MAX_VALUE;
 				minIdx = 0;
@@ -123,6 +125,7 @@ public class HMMKmeans {
 			hmm.update(features, segments);
 			err = meanSampleProb();
 		}
+		System.out.println("Prob is: " + err);
 	}
 	
 	public double getSampleProb(Matrix feats){

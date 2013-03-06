@@ -13,8 +13,8 @@ public class HMM {
 	private double [] finals;
 	private double [][] transitions;
 	private double [] denoms;
-	private double [][] ascalers;
-	private double [][] bscalers;
+	//private double [][] ascalers;
+	//private double [][] bscalers;
 	protected ArrayList<Matrix> alphas;
 	protected ArrayList<Matrix> betas;
 	protected ArrayList<Matrix> gammas;
@@ -52,9 +52,10 @@ public class HMM {
 		for(int i=0; i<numStates;i++){
 			weights[i] = weights[i]/totalPoints;
 			for(int j=0; j<numStates;j++){
-				transitions[i][j] = (double)transitions[i][j]/(totalPoints-segments.length);
+				transitions[i][j] = (double)transitions[i][j]/(totalPoints);//-segments.length);
 			}
 		}
+		
 		
 	}
 	
@@ -72,7 +73,7 @@ public class HMM {
 		for(int i=0; i<numStates;i++){
 			weights[i] = weights[i]/totalPoints;
 			for(int j=0; j<numStates;j++){
-				transitions[i][j] = (double)transitions[i][j]/(totalPoints-segments.length);
+				transitions[i][j] = (double)transitions[i][j]/(totalPoints);
 			}
 		}
 	}
@@ -100,21 +101,31 @@ public class HMM {
 			means[i] = 0;
 			covars[i] = 0;
 		}
+		int total = 0;
 		for(Matrix m: features){
 			for (int i=0; i<m.getRowDimension(); i++){
 				for(int j=0; j<numFeats; j++){
-					means[j] += m.get(i, j);
+					//if(!Double.isNaN(m.get(i,j)) && !Double.isInfinite(m.get(i,j))){
+						means[j] += m.get(i, j);
+						//total += 1;
+					//}
+					//System.out.println(m.get(i, j));
 				}
 			}
 		}
 		
+		//System.out.println("Printing means..");
 		for(int i=0;i<means.length;i++){
+			//System.out.print(means[i]);
+			//System.out.print("\t");
 			means[i] = means[i]/totalPoints;
 		}
+		//System.out.println();
 		
 		for(Matrix m: features){
 			for (int i=0; i<m.getRowDimension(); i++){
 				for(int j=0; j<numFeats; j++){
+					//if (!Double.isNaN(m.get(i, j))&& !Double.isInfinite(m.get(i,  j)))
 					covars[j] += Math.pow((m.get(i, j)-means[j]),2);
 				}
 			}
@@ -127,7 +138,10 @@ public class HMM {
 		// Update Gaussians
 		for (int i=0; i<numStates; i++){
 			states[i].setParams(means, covars, weights[i]);
+			
 		}	
+		//states[1].printAll();
+		//System.out.println(totalPoints);
 	}
 	
 	private void updateGaussianParams(ArrayList<Matrix> features){
@@ -206,14 +220,16 @@ public class HMM {
 					sum += (alph.get(r,t-1)*transitions[r][s]*getEmmitProb(vals, states[s]));
 				}
 				scaler[t] += sum; 
-				if (sum >= 0){ //tester
+				
+				/*if (sum >= 0){ //tester
 					nonan ++;
 				}else{ //tester
 					nan ++;
-				}
+				}*/
 					
 				alph.set(s, t, sum);
 			}
+			
 			for (int s=0; s< numStates; s++){
 				double org = alph.get(s, t);
 				alph.set(s, t, org/scaler[t]);
@@ -223,8 +239,8 @@ public class HMM {
 		if (!test){
 			alphas.add(alph.copy());
 		}
-		System.out.println("Nans\t" + nan); //tester
-		System.out.println("Non Nans\t" + nonan); //tester
+		//System.out.println("Nans\t" + nan); //tester
+		//System.out.println("Non Nans\t" + nonan); //tester
 		ArrayList ret = new ArrayList(2);
 		ret.add(alph);
 		ret.add(scaler);
@@ -253,6 +269,7 @@ public class HMM {
 				scaler[t] += sum; 
 				beta.set(s, t, sum);
 			}
+			
 			for (int s=0; s< numStates; s++){
 				double org = beta.get(s, t);
 				beta.set(s, t, org/scaler[t]);
@@ -264,7 +281,7 @@ public class HMM {
 	
 	private void calculateGammas(ArrayList<Matrix> features){
 		for(int i=0;i<alphas.size();i++){
-			System.out.println("Alpha size: "+alphas.size());
+			//System.out.println("Alpha size: "+alphas.size());
 			Matrix alph = alphas.get(i);
 			Matrix beta = betas.get(i);
 			int nFrames = alph.getColumnDimension();
@@ -320,8 +337,8 @@ public class HMM {
 		betas = new ArrayList<Matrix>(features.size());
 		gammas = new ArrayList<Matrix>(features.size());
 		tgammas = new ArrayList<ArrayList<Matrix>>(features.size());
-		ascalers = new double [features.size()][];
-		bscalers = new double [features.size()][];
+		//ascalers = new double [features.size()][];
+		//bscalers = new double [features.size()][];
 		clearAll();
 		calculateHMMParams(segments);
 		calculateGaussianParams(features);
@@ -329,6 +346,7 @@ public class HMM {
 	}
 	
 	public void update(ArrayList<Matrix> features, int [][] segments){
+		//System.out.println("In update...");
 		alphas.clear();
 		betas.clear();
 		gammas.clear();
@@ -338,7 +356,8 @@ public class HMM {
 			calculateBetas(features.get(t));
 		}
 		calculateGammas(features);
-		//updateTransitions(segments);
+		updateTransitions(segments);
+		//updateHMMParams();
 		updateGaussianParams(features);
 	}
 	
@@ -350,7 +369,8 @@ public class HMM {
 		for(int i=0; i< m.getRowDimension(); i++){
 			result += m.get(i, m.getColumnDimension()-1);
 		}
-		double sumLogC = 1.0;
+		
+		double sumLogC = 0.0;
 	    for (int k = 0; k < consts.length; k++) {
 	        sumLogC += Math.log(consts[k]);
 	    	//sumLogC *= consts[k];
@@ -363,14 +383,14 @@ public class HMM {
 	}
 	
 	private double getEmmitProb(Double[] vals, Gaussian clus){
-		double dist = 0;
+		double dist = 1.0;
 		double sumi = 0;
-		dist = Math.pow(2*3.14*clus.getDeterminant(), 0.5);
-		dist = (double) 1.0/dist;
 		for (int i = 0; i < numFeats; i++){
-			sumi += (Math.pow((vals[i].doubleValue() - clus.getMeans()[i]), 2)/(clus.getCovars()[i]));
+			sumi = (Math.pow((vals[i].doubleValue() - clus.getMeans()[i]), 2)/(clus.getCovars()[i]));
+			sumi = Math.exp(-0.5*sumi)*Math.pow(2*3.14*clus.getCovars()[i], -0.5);
+			//System.out.println(sumi);
+			dist *= sumi;
 		}
-		dist = dist * Math.exp(-0.5*sumi);
 		return dist;
 	}
 	

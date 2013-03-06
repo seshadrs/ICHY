@@ -53,5 +53,22 @@ public class Gaussian {
 	public double getDeterminant(){
 		return determinant;
 	}
+	
+	public void printAll(){
+		System.out.println("Means..");
+		for(int i=0; i<mean.length; i++){
+			System.out.print(mean[i]);
+			System.out.print("\t");
+		}
+		System.out.println();
+		System.out.println("Covars..");
+		for(int i=0; i<covariance.length; i++){
+			System.out.print(covariance[i]);
+			System.out.print("\t");
+		}
+		System.out.println();
+		System.out.println("Determinant..");
+		System.out.println(determinant);
+	}
 
 }

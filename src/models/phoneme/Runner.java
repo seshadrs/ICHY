@@ -19,15 +19,62 @@ public class Runner {
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws IOException {
+		
 		String phfi = "an4/etc/an4.phone"; // list of phonemes
 		String dicfi = "an4/etc/an4.dic"; // word -> phoneme dic
-		String trainfi = "an4/etc/an4_train.transcription"; // transcription file
+		String trainfi = "an4/etc/an4_train_part.transcription"; // transcription file
 		String isofi = "an4/etc/an4_iso.transcription";
 		String trainpath = "an4/wav/train/"; // path to audio files
 		String isopath = "an4/wav/isow/";
 		String isomodpath = "an4/models/ph_isow/";
-		//TrainHmm(phfi, dicfi, isofi, isopath, "iso");
-		TrainHmm(phfi, dicfi, trainfi, trainpath, "con");
+		
+		TrainHmm(phfi, dicfi, isofi, isopath, "iso");
+		//TrainHmm(phfi, dicfi, trainfi, trainpath, "con");
+		//TestHmm(phfi, dicfi);
+	}
+	
+	private static void TestHmm(String phfi, String dicfi) throws IOException{
+		
+		String aufi = "an4/wav/isow/FEBRUARY.wav";
+		String [] cands = {"MAY", "A B Y", "M A", "MARCH"};
+		
+		ArrayList<String> phDic = new ArrayList<String>();
+		HashMap<String, String> dic = new HashMap<String, String>();
+		ArrayList<String> words = new ArrayList<String>(cands.length);
+		MFCC featExtractor = new MFCC(16000, 50, 7000, 40);
+		int numFeats = 39;
+		String line;
+		
+		// phoneme list
+		BufferedReader phr = new BufferedReader(new FileReader(phfi));
+		while ((line = phr.readLine()) != null) {
+		    phDic.add(line.trim());
+		}
+		phr.close();
+		
+		// dictionary
+		BufferedReader dicr = new BufferedReader(new FileReader(dicfi));
+		while ((line = dicr.readLine()) != null) {
+			String [] ll = line.split("\\s", 2);
+			dic.put(ll[0].trim(), ll[1].trim());
+		}
+		dicr.close();
+		
+		for (String s: cands){
+			String word = "SIL ";
+			for(String w : s.split("\\s")){
+				word += dic.get(w) + " ";
+			}
+			words.add(word+"SIL");
+		}
+		
+		double [] audioData = IO.read(aufi); // wav file
+		double[][] featVectors = featExtractor.extractAll39Features(audioData);
+		Matrix m = new Matrix(featVectors);
+		
+		PhonemeHmmTester testhmm = new PhonemeHmmTester(phDic);
+		testhmm.test(words, m, numFeats);
+		
 	}
 	
 	private static void TrainHmm(String phfi, String dicfi, String datafi, String path, String type) throws IOException{

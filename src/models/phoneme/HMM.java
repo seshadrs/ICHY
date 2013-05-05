@@ -133,7 +133,8 @@ public class HMM {
 		double [][] trellis = new double[m.getRowDimension()][numStates];
 		int [][] backp = new int [m.getRowDimension()][numStates];
 		// at t=0, in state 0
-		trellis[0][0] = getEmmitProb(m, 0, states[0]);
+		trellis[0][0] = Math.log10(getEmmitProb(m, 0, states[0]));
+		System.out.println(trellis[0][0]);
 		for (int i=1; i<trellis[0].length;i++){
 			trellis[0][i] = 0;
 		}
@@ -144,11 +145,18 @@ public class HMM {
 		double ep = 0;
 		for(int i=1;i<trellis.length;i++){
 			for (int j=0;j<trellis[0].length;j++){
-				ep = getEmmitProb(m, i, states[j]);
+				ep = Math.log10(getEmmitProb(m, i, states[j]));
 				bestj = j;
-				bestp = trellis[i-1][j]*transitions[j][j]*ep;
+				if (trellis[i-1][j]!=0){
+					bestp = Math.log10(trellis[i-1][j])+Math.log10(transitions[j][j])+ep;
+				}
+				else
+					bestp = Double.NEGATIVE_INFINITY;
 				if(j != 0){
-					cp = trellis[i-1][j-1]*transitions[j-1][j]*ep;
+					if(trellis[i-1][j-1]!=0)
+						cp = Math.log10(trellis[i-1][j-1])+Math.log10(transitions[j-1][j])+ep;
+					else
+						cp = Double.NEGATIVE_INFINITY;
 					if (cp > bestp){
 						bestp = cp;
 						bestj = j-1;
@@ -158,13 +166,47 @@ public class HMM {
 				backp[i][j] = bestj;
 			}
 		}
+		System.out.println("1,0: "+trellis[1][0]);
 		int sid = backp[0].length-1;
 		seq.add(0, sid);
 		for (int i=backp.length-2;i>=0;i--){
 			sid = backp[i+1][sid];
 			seq.add(0, sid);
 		}
+		System.out.println("Path scr: "+trellis[trellis.length-1][trellis[0].length-1]);
 		return seq;
+	}
+	
+	public double Score (Matrix m){
+		double score = 0.0;
+		double [][] trellis = new double[m.getRowDimension()][numStates];
+		// at t=0, in state 0
+		trellis[0][0] = getEmmitProb(m, 0, states[0]);
+		for (int i=1; i<trellis[0].length;i++){
+			trellis[0][i] = 0;
+		}
+		double bestp = 0;
+		double ep = 0;
+		double cp = 0;
+		for(int i=1;i<trellis.length;i++){
+			for (int j=0;j<trellis[0].length;j++){
+				ep = getEmmitProb(m, i, states[j]);
+				bestp = trellis[i-1][j]*transitions[j][j]*ep;
+				if(j != 0){
+					cp = trellis[i-1][j-1]*transitions[j-1][j]*ep;
+					if (cp > bestp){
+						bestp = cp;
+					}	
+				}
+				System.out.println(bestp);
+				trellis[i][j] = bestp;
+			}
+		}
+		int size = trellis.length-1;
+		for (int s=0; s<trellis[0].length;s++){
+			score += trellis[size][s];
+		}
+		return score;
 	}
 	
 	private double getEmmitProb(Matrix m, int row, Gaussian clus){

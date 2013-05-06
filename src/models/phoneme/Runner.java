@@ -22,21 +22,21 @@ public class Runner {
 		
 		String phfi = "an4/etc/an4.phone"; // list of phonemes
 		String dicfi = "an4/etc/an4.dic"; // word -> phoneme dic
-		String trainfi = "an4/etc/an4_train_part.transcription"; // transcription file
+		String trainfi = "an4/etc/an4_train.transcription"; // transcription file
 		String isofi = "an4/etc/an4_iso.transcription";
 		String trainpath = "an4/wav/train/"; // path to audio files
 		String isopath = "an4/wav/isow/";
 		String isomodpath = "an4/models/ph_isow/";
 		
-		TrainHmm(phfi, dicfi, isofi, isopath, "iso");
+		//TrainHmm(phfi, dicfi, isofi, isopath, "iso");
 		//TrainHmm(phfi, dicfi, trainfi, trainpath, "con");
-		//TestHmm(phfi, dicfi);
+		TestHmm(phfi, dicfi);
 	}
 	
 	private static void TestHmm(String phfi, String dicfi) throws IOException{
 		
 		String aufi = "an4/wav/isow/FEBRUARY.wav";
-		String [] cands = {"MAY", "A B Y", "M A", "MARCH"};
+		String [] cands = {"MAY", "FEBRUARY SIXTH", "M A", "MARCH", "SIX", "FEBRUARY"};
 		
 		ArrayList<String> phDic = new ArrayList<String>();
 		HashMap<String, String> dic = new HashMap<String, String>();
@@ -121,7 +121,7 @@ public class Runner {
 			for(String w : ll[0].split("\\s")){
 				word += dic.get(w) + " ";
 			}
-			System.out.println(word);
+			//System.out.println(word);
 			features.add(m);
 			words.add(word+"SIL");
 		}

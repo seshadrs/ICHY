@@ -41,21 +41,26 @@ public class PhonemeHmmTester {
 	// do a forward algo through Hmm to get score
 	private void score(ArrayList<String>words, Matrix features, int numFeats){
 		System.out.println("In score..");
-		nsegs = new HashMap<String, ArrayList<String>>();
-		ntrans = new HashMap<String, HashMap<Integer,Integer>>();
+		//nsegs = new HashMap<String, ArrayList<String>>();
+		//ntrans = new HashMap<String, HashMap<Integer,Integer>>();
 		System.out.println("Current Word Scores.....");
 		for(int i=0; i<words.size(); i++){
 			String [] phonemes = words.get(i).split("\\s");
 			HMM cwhmm = new HMM(phonemes.length*K, numFeats);
 			double [][] transitions = new double[phonemes.length*K][phonemes.length*K];
+			for (int tii=0; tii<transitions.length;tii++){
+				for (int tjj=0;tjj<transitions[0].length;tjj++){
+					transitions[tii][tjj] = 0.0;
+				}
+			}
 			Gaussian [] states = new Gaussian[phonemes.length*K];
 			HashMap<Integer,String>map = new HashMap<Integer, String>(phonemes.length*K);
 			int stateId = 0;
 			int sit = 0;
 			for(String phoneme : phonemes){
-				if (stateId != 0){
+				/*if (stateId != 0){
 					transitions[stateId-1][stateId] = 1.0;
-				}
+				}*/
 				double [][] trans = phHmms.get(phoneme).getTransitions();
 				for(int t1=0;t1<trans.length;t1++){
 					for(int t2=0;t2<trans.length;t2++){
@@ -69,10 +74,15 @@ public class PhonemeHmmTester {
 					stateId ++;
 					sit ++;
 				}
+				if (stateId<transitions.length){
+					//transitions[stateId-1][stateId] = phHmms.get(phoneme).getEndProb();
+					transitions[stateId-1][stateId] = 1 - trans[2][2];
+				}
 			}
 			cwhmm.setTransitions(transitions);
 			cwhmm.setStates(states);
 			
+			//cwhmm.Viterbi(features);
 			// get score
 			double score = cwhmm.Score(features);
 			System.out.println(words.get(i) + " : " + score);
@@ -80,7 +90,7 @@ public class PhonemeHmmTester {
 	}
 	
 	public void test(ArrayList<String> words, Matrix feats, int numFeats) throws IOException{
-		String path = "an4/models/ph_cont/";
+		String path = "an4/models/ph_isow/";
 		initialize(numFeats, path);
 		score(words, feats, numFeats);
 	}

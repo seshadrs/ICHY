@@ -48,14 +48,19 @@ public class PhonemeHmmCW {
 			String [] phonemes = words.get(i).split("\\s");
 			HMM cwhmm = new HMM(phonemes.length*K, numFeats);
 			double [][] transitions = new double[phonemes.length*K][phonemes.length*K];
+			for (int tii=0; tii<transitions.length;tii++){
+				for (int tjj=0;tjj<transitions[0].length;tjj++){
+					transitions[tii][tjj] = 0.0;
+				}
+			}
 			Gaussian [] states = new Gaussian[phonemes.length*K];
 			HashMap<Integer,String>map = new HashMap<Integer, String>(phonemes.length*K);
 			int stateId = 0;
 			int sit = 0;
 			for(String phoneme : phonemes){
-				if (stateId != 0){
-					transitions[stateId-1][stateId] = 1.0;
-				}
+				/*if (stateId != 0){
+					transitions[stateId-1][stateId] = 0.3;
+				}*/
 				double [][] trans = phHmms.get(phoneme).getTransitions();
 				for(int t1=0;t1<trans.length;t1++){
 					for(int t2=0;t2<trans.length;t2++){
@@ -63,11 +68,16 @@ public class PhonemeHmmCW {
 					}	
 				}
 				sit = 0;
-				for(Gaussian s: phHmms.get(phoneme).getStates()){
-					states[stateId] = s;
+				Gaussian [] curr_st = phHmms.get(phoneme).getStates();
+				for(int curr_i=0; curr_i<curr_st.length;curr_i++){
+					states[stateId] = curr_st[curr_i];
 					map.put(stateId, phoneme+";"+sit);
 					stateId ++;
 					sit ++;
+				}
+				if (stateId<transitions.length){
+					//transitions[stateId-1][stateId] = phHmms.get(phoneme).getEndProb();
+					transitions[stateId-1][stateId] = 1 - trans[2][2];
 				}
 			}
 			cwhmm.setTransitions(transitions);
@@ -90,11 +100,17 @@ public class PhonemeHmmCW {
 					ntrans.get(psta).put(0, 0);
 					ntrans.get(psta).put(1, 0);
 					ntrans.get(psta).put(2, 0);
+					ntrans.get(psta).put(3, 0);
 				}
-				ntrans.get(psta).put(Integer.parseInt(sta.split(";")[1]), ntrans.get(psta).get(Integer.parseInt(sta.split(";")[1]))+1);
+				if (psta.split(";")[0].equals(sta.split(";")[0]))
+					ntrans.get(psta).put(Integer.parseInt(sta.split(";")[1]), ntrans.get(psta).get(Integer.parseInt(sta.split(";")[1]))+1);
+				else
+					ntrans.get(psta).put(3, ntrans.get(psta).get(3)+1);
+				psta = sta;
 			}
 		}
 	}
+	
 	
 	private void update(ArrayList<Matrix>features){
 		
@@ -110,7 +126,7 @@ public class PhonemeHmmCW {
 		String path = "an4/models/ph_isow/";
 		initialize(numFeats, path);
 		int numits = 0;
-		while(numits < 10){
+		while(numits < 20){
 			segment(words, features, numFeats);
 			update(features);
 			numits++;

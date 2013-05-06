@@ -42,7 +42,7 @@ public class PhonemeHmmIW {
 		//uniform segmentation
 		int wid = 0;
 		for (String w : words){
-			System.out.println("Doing word " + w);
+			//System.out.println("Doing word " + w);
 			int iid = 0;
 			int oid = 0;
 			int pid = 0;
@@ -57,14 +57,14 @@ public class PhonemeHmmIW {
 			//segments[wid] = new String [features.get(wid).getRowDimension()];
 			//seglen = (segments[wid].length)/(phonemes.length * K);
 			int nf = features.get(wid).getRowDimension();
-			System.out.println(nf);
+			//System.out.println(nf);
 			seglen = nf/(phonemes.length * K);
 			while (oid < nf){
 				if (iid > seglen){
 					if(psid == 2){
 						psid = 0;
 						pid ++;
-						ppid = -1;
+						//ppid = -1;
 					}
 					else{
 						psid ++;
@@ -82,8 +82,12 @@ public class PhonemeHmmIW {
 						transitions.get(pstate).put(0, 0);
 						transitions.get(pstate).put(1, 0);
 						transitions.get(pstate).put(2, 0);
+						transitions.get(pstate).put(3, 0);
 					}
-					transitions.get(pstate).put(psid, (transitions.get(pstate).get(psid))+1);
+					if (ppid == pid)
+						transitions.get(pstate).put(psid, (transitions.get(pstate).get(psid))+1);
+					else
+						transitions.get(pstate).put(3, (transitions.get(pstate).get(3))+1);
 			    }
 				ppid = pid;
 				ppsid = psid;
@@ -103,7 +107,7 @@ public class PhonemeHmmIW {
 		
 		// initialize
 		for (String ph : segments.keySet()){
-			System.out.println("initializing phone " + ph);
+			//System.out.println("initializing phone " + ph);
 			int st = Integer.parseInt(ph.split(";")[1]); 
 			phHmms.get(ph.split(";")[0]).updateParams(st, segments.get(ph), features, transitions.get(ph));
 		}
@@ -118,14 +122,19 @@ public class PhonemeHmmIW {
 			String [] phonemes = words.get(i).split("\\s");
 			HMM cwhmm = new HMM(phonemes.length*K, numFeats);
 			double [][] transitions = new double[phonemes.length*K][phonemes.length*K];
+			for (int tii=0; tii<transitions.length;tii++){
+				for (int tjj=0;tjj<transitions[0].length;tjj++){
+					transitions[tii][tjj] = 0.0;
+				}
+			}
 			Gaussian [] states = new Gaussian[phonemes.length*K];
 			HashMap<Integer,String>map = new HashMap<Integer, String>(phonemes.length*K);
 			int stateId = 0;
 			int sit = 0;
 			for(String phoneme : phonemes){
-				if (stateId != 0){
-					transitions[stateId-1][stateId] = 1.0;
-				}
+				/*if (stateId != 0){
+					transitions[stateId-1][stateId] = 0.3;
+				}*/
 				double [][] trans = phHmms.get(phoneme).getTransitions();
 				for(int t1=0;t1<trans.length;t1++){
 					for(int t2=0;t2<trans.length;t2++){
@@ -133,11 +142,16 @@ public class PhonemeHmmIW {
 					}	
 				}
 				sit = 0;
-				for(Gaussian s: phHmms.get(phoneme).getStates()){
-					states[stateId] = s;
+				Gaussian [] curr_st = phHmms.get(phoneme).getStates();
+				for(int curr_i=0; curr_i<curr_st.length;curr_i++){
+					states[stateId] = curr_st[curr_i];
 					map.put(stateId, phoneme+";"+sit);
 					stateId ++;
 					sit ++;
+				}
+				if (stateId<transitions.length){
+					//transitions[stateId-1][stateId] = phHmms.get(phoneme).getEndProb();
+					transitions[stateId-1][stateId] = 1 - trans[2][2];
 				}
 			}
 			cwhmm.setTransitions(transitions);
@@ -160,8 +174,13 @@ public class PhonemeHmmIW {
 					ntrans.get(psta).put(0, 0);
 					ntrans.get(psta).put(1, 0);
 					ntrans.get(psta).put(2, 0);
+					ntrans.get(psta).put(3, 0);
 				}
-				ntrans.get(psta).put(Integer.parseInt(sta.split(";")[1]), ntrans.get(psta).get(Integer.parseInt(sta.split(";")[1]))+1);
+				if (psta.split(";")[0].equals(sta.split(";")[0]))
+					ntrans.get(psta).put(Integer.parseInt(sta.split(";")[1]), ntrans.get(psta).get(Integer.parseInt(sta.split(";")[1]))+1);
+				else
+					ntrans.get(psta).put(3, ntrans.get(psta).get(3)+1);
+				psta = sta;
 			}
 		}
 	}
@@ -179,7 +198,7 @@ public class PhonemeHmmIW {
 	public void train(ArrayList<String>words, ArrayList<Matrix>features, int numFeats) throws IOException{
 		initialize(words, features, numFeats);
 		int numits = 0;
-		while(numits < 15){
+		while(numits < 25){
 			segment(words, features, numFeats);
 			update(features);
 			numits++;

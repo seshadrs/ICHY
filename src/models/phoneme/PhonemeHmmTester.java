@@ -1,5 +1,7 @@
 package models.phoneme;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,6 +14,7 @@ public class PhonemeHmmTester {
 	protected HashMap<String, HMM> phHmms;
 	private HashMap<String, ArrayList<String>> nsegs;
 	private HashMap<String, HashMap<Integer,Integer>> ntrans;
+	private HashMap<String, String> gold;
 	
 	
 	//****** Constructor *********//
@@ -21,6 +24,7 @@ public class PhonemeHmmTester {
 		for (String ph:phDic){
 			phHmms.put(ph,  new HMM(K));
 		}
+		//this.dic = dic;
 	}
 	
 	
@@ -39,11 +43,10 @@ public class PhonemeHmmTester {
 	
 	// compose an HMM from the transcript
 	// do a forward algo through Hmm to get score
-	private void score(ArrayList<String>words, Matrix features, int numFeats){
-		System.out.println("In score..");
-		//nsegs = new HashMap<String, ArrayList<String>>();
-		//ntrans = new HashMap<String, HashMap<Integer,Integer>>();
-		System.out.println("Current Word Scores.....");
+	private ArrayList<Double> score(ArrayList<String>words, Matrix features, int numFeats){
+		//System.out.println("In score..");
+		//System.out.println("Calculating Word Scores.....");
+		ArrayList<Double> scores = new ArrayList<Double>(words.size());
 		for(int i=0; i<words.size(); i++){
 			String [] phonemes = words.get(i).split("\\s");
 			HMM cwhmm = new HMM(phonemes.length*K, numFeats);
@@ -85,14 +88,58 @@ public class PhonemeHmmTester {
 			//cwhmm.Viterbi(features);
 			// get score
 			double score = cwhmm.Score(features);
+			scores.add(score);
 			System.out.println(words.get(i) + " : " + score);
 		}
+		return scores;
 	}
 	
-	public void test(ArrayList<String> words, Matrix feats, int numFeats) throws IOException{
-		String path = "an4/models/ph_isow/";
+	public int testOne(ArrayList<String> words, Matrix feats, int numFeats) throws IOException{
+		String path = "an4/models/ph_cont20/";
 		initialize(numFeats, path);
-		score(words, feats, numFeats);
+		ArrayList<Double>scores = score(words, feats, numFeats);
+		double maxsc = scores.get(0);
+		int maxk = 0;
+		for (int k=1;k<scores.size();k++){
+			if (scores.get(k) > maxsc){
+				maxsc = scores.get(k);
+				maxk = k;
+			}
+		}
+		return maxk;
+	}
+	
+	public void test(ArrayList<String> words, ArrayList<Matrix> feats, ArrayList<String> ids, int numFeats) throws IOException{
+		String path = "an4/models/ph_cont10/";
+		BufferedWriter ofi = new BufferedWriter(new FileWriter("an4/etc/an4_test10.scores"));
+		initialize(numFeats, path);
+		int correct = 0;
+		System.out.println("ID, Gold, Recognized");
+		for (int idx=0; idx<feats.size();idx++){
+			Matrix m = feats.get(idx);
+			ArrayList<Double>scores = score(words, m, numFeats);
+			ofi.write(ids.get(idx)+"\n");
+			double maxsc = scores.get(0);
+			int maxk = 0;
+			ofi.write(maxsc+"\t");
+			for (int k=1;k<scores.size();k++){
+				if (scores.get(k) > maxsc){
+					maxsc = scores.get(k);
+					maxk = k;
+				}
+				ofi.write(scores.get(k)+"\t");
+			}
+			ofi.write("\n");
+			if (maxk == idx){
+				correct++;
+			}
+			System.out.println(ids.get(idx)+", \""+words.get(idx)+"\", \""+words.get(maxk)+"\"");
+		}
+		ofi.close();
+		double acc = correct/feats.size();
+		System.out.println("Correctly recognized: " + correct);
+		System.out.println("Total samples: " + feats.size());
+		System.out.println("Accuracy: " + acc);
 	}
 	
 

@@ -126,16 +126,32 @@ public class PhonemeHmmCW {
 		String path = "an4/models/ph_isow/";
 		initialize(numFeats, path);
 		int numits = 0;
-		while(numits < 20){
+		while(numits < 50){
+			switch(numits){
+				case 10:
+					storeModels("an4/models/ph_cont10/");
+					System.out.println("Done with 10");
+					break;
+				case 30:
+					storeModels("an4/models/ph_cont30/");
+					System.out.println("Done with 30");
+					break;
+				case 40:
+					storeModels("an4/models/ph_cont40/");
+					System.out.println("Done with 40");
+					break;
+				default:
+					break;	
+			}
+			
 			segment(words, features, numFeats);
 			update(features);
 			numits++;
 		}
-		storeModels();
+		storeModels("an4/models/ph_cont50/");
 	}
 	
-	private void storeModels() throws IOException{
-		String path = "an4/models/ph_cont/";
+	private void storeModels(String path) throws IOException{
 		for (String ph:phHmms.keySet()){
 			phHmms.get(ph).prettyPrint(path+ph+".model");
 		}

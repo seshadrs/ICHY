@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.io.File;
 
 import speech.audio.feat.MFCC;
 import speech.audio.utils.IO;
@@ -31,15 +32,17 @@ public class Runner {
 		String testfi = "an4/etc/an4_test.transcription";
 		
 		//TrainHmm(phfi, dicfi, isofi, isopath, "iso");
+		//TrainHmmAN4(phfi, dicfi, isofi, isopath, "iso");
 		//TrainHmm(phfi, dicfi, trainfi, trainpath, "con");
-		TestHmm(phfi, dicfi);
+		//TestHmm(phfi, dicfi);
 		//TestHmmFull(phfi, dicfi, testpath, testfi);
+		
 	}
 	
 	private static void TestHmm(String phfi, String dicfi) throws IOException{
 		
-		String aufi = "an4/wav/test/fcaw/an408-fcaw-b.wav"; //B A O Z FIVE THREE
-		String [] cands = {"W O O D", "J A N E T", "B A O Z FIVE THREE"};
+		String aufi = "an4/wav/test/miry/an400-miry-b.wav"; //B A O Z FIVE THREE
+		String [] cands = {"ENTER W O O D EIGHT", "J A N E T", "B A O Z FIVE THREE", "ENTER EIGHT"}; //"TEN TWENTY SEVEN SIXTY TWO"
 		
 		//String aufi = "an4/wav/isow/FEBRUARY.wav";
 		//String [] cands = {"FEBRUARY", "FEBRUARY SIXTH", "MAY", "MARCH"};
@@ -150,6 +153,7 @@ public class Runner {
 		
 		ArrayList<String> phDic = new ArrayList<String>();
 		ArrayList<String> words = new ArrayList<String>();
+		ArrayList<String> fullwords = new ArrayList<String>();
 		ArrayList<String> ids = new ArrayList<String>();
 		ArrayList<Matrix> features = new ArrayList<Matrix>();
 		HashMap<String, String> dic = new HashMap<String, String>();
@@ -191,12 +195,79 @@ public class Runner {
 			//System.out.println(word);
 			features.add(m);
 			words.add(word+"SIL");
+			fullwords.add(ll[0]);
 		}
 		dtr.close();
 		
 		PhonemeHmmTester testhmm = new PhonemeHmmTester(phDic);
-		testhmm.test(words, features, ids, numFeats);
+		testhmm.test(words, features, ids, numFeats, fullwords);
 		
 	}
+	
+	private static void TrainHmmAN4(String phfi, String dicfi, String datafi, String path, String type) throws IOException{
+		ArrayList<String> phDic = new ArrayList<String>();
+		ArrayList<String> words = new ArrayList<String>();
+		ArrayList<Matrix> features = new ArrayList<Matrix>();
+		HashMap<String, String> dic = new HashMap<String, String>();
+		MFCC featExtractor = new MFCC(16000, 50, 7000, 40);
+		int numFeats = 39;
+		
+		String line;
+		HashMap<String, Integer> cph = new HashMap<String, Integer>();
+		
+		// phoneme list
+		BufferedReader phr = new BufferedReader(new FileReader(phfi));
+		while ((line = phr.readLine()) != null) {
+		    phDic.add(line.trim());
+		    cph.put(line.trim(), 0);
+		}
+		phr.close();
+		
+		// dictionary
+		BufferedReader dicr = new BufferedReader(new FileReader(dicfi));
+		while ((line = dicr.readLine()) != null) {
+			String [] ll = line.split("\\s", 2);
+			dic.put(ll[0].trim(), ll[1].trim());
+		}
+		dicr.close();
+		
+		//rec files
+		File folder = new File(path);
+		File[] fList = folder.listFiles();
+		String w = "";
+		for (File f : fList){
+			if (f.getName().contains("-")){
+				w = f.getName().split("-")[0].replace(".wav", ""); 
+			}
+			else{
+				w = f.getName().replace(".wav", "");
+			}
+			String word;
+			if (w.equals("SIL"))
+				word = "SIL";
+			else
+				word = dic.get(w);
+			for(String phh : word.split("\\s")){
+				cph.put(phh, cph.get(phh)+1);
+			}
+			double [] audioData = IO.read(path+f.getName());
+			double[][] featVectors = featExtractor.extractAll39Features(audioData);
+			Matrix m = new Matrix(featVectors);
+			features.add(m);
+			words.add(word);
+			System.out.println(word);
+		}
+		
+		for(String itm:cph.keySet()){
+			System.out.println(itm+" : "+cph.get(itm));
+		}
+		
+		// train phoneme HMM from isolated words
+		if (type.equals("iso")){ 
+			PhonemeHmmIW iwhmm = new PhonemeHmmIW(phDic);
+			iwhmm.train(words, features, numFeats);
+		}
+	}
+	
 
 }

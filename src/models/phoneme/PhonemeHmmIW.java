@@ -107,7 +107,7 @@ public class PhonemeHmmIW {
 		
 		// initialize
 		for (String ph : segments.keySet()){
-			//System.out.println("initializing phone " + ph);
+			System.out.println("initializing phone " + ph);
 			int st = Integer.parseInt(ph.split(";")[1]); 
 			phHmms.get(ph.split(";")[0]).updateParams(st, segments.get(ph), features, transitions.get(ph));
 		}
@@ -198,7 +198,7 @@ public class PhonemeHmmIW {
 	public void train(ArrayList<String>words, ArrayList<Matrix>features, int numFeats) throws IOException{
 		initialize(words, features, numFeats);
 		int numits = 0;
-		while(numits < 25){
+		while(numits < 40){
 			segment(words, features, numFeats);
 			update(features);
 			numits++;
@@ -207,7 +207,8 @@ public class PhonemeHmmIW {
 	}
 	
 	private void storeModels() throws IOException{
-		String path = "an4/models/ph_isow/";
+		//String path = "aurora/models/wo_isow/";
+		String path = "aurora/models/wo_isow/";
 		for (String ph:phHmms.keySet()){
 			phHmms.get(ph).prettyPrint(path+ph+".model");
 		}

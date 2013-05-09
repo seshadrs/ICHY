@@ -61,6 +61,7 @@ public class PhonemeHmmCW {
 				/*if (stateId != 0){
 					transitions[stateId-1][stateId] = 0.3;
 				}*/
+				//System.out.println(phoneme);
 				double [][] trans = phHmms.get(phoneme).getTransitions();
 				for(int t1=0;t1<trans.length;t1++){
 					for(int t2=0;t2<trans.length;t2++){
@@ -123,11 +124,11 @@ public class PhonemeHmmCW {
 	}
 	
 	public void train(ArrayList<String>words, ArrayList<Matrix>features, int numFeats) throws IOException{
-		String path = "an4/models/ph_isow/";
+		String path = "aurora/models/wo_isow/";
 		initialize(numFeats, path);
 		int numits = 0;
-		while(numits < 50){
-			switch(numits){
+		while(numits < 20){
+			/*switch(numits){
 				case 10:
 					storeModels("an4/models/ph_cont10/");
 					System.out.println("Done with 10");
@@ -143,12 +144,12 @@ public class PhonemeHmmCW {
 				default:
 					break;	
 			}
-			
+			*/
 			segment(words, features, numFeats);
 			update(features);
 			numits++;
 		}
-		storeModels("an4/models/ph_cont50/");
+		storeModels("aurora/models/wo_cont/");
 	}
 	
 	private void storeModels(String path) throws IOException{

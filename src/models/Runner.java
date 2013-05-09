@@ -20,9 +20,9 @@ public class Runner {
 	public static void main(String[] args) throws IllegalArgumentException, IOException {
 		
 		
-		String path = "recordings/digits/";//args[0]; //"recordings/digits/"
+		String path = "recordings/digits/";//args[0]; 
 		String fileprefix = "template_";//args[1]; //"template_"
-		int numTemplates = 5;//Integer.parseInt(args[2]); //5
+		int numTemplates = 4;//Integer.parseInt(args[2]); //5
 		MFCC featExtractor = new MFCC(16000, 50, 7000, 40);
 		String [] digits = {"0", "1", "2", "3", "4"};
 		ArrayList<HMMKmeans> models = new ArrayList<HMMKmeans>(digits.length);
@@ -43,9 +43,12 @@ public class Runner {
 		System.out.println();
 		System.out.println("TESTING....");
 		System.out.println();
+		
 		//Testing
+		
 		int correct = 0;
 		fileprefix = "test_";
+		numTemplates = 5;
 		for (String s : digits){
 			System.out.println("Testing digit "+s);
 			for(int i=1; i<=numTemplates; i++){

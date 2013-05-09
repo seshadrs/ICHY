@@ -87,15 +87,15 @@ public class PhonemeHmmTester {
 			
 			//cwhmm.Viterbi(features);
 			// get score
-			double score = cwhmm.Score(features);
+			double score = cwhmm.Score(features);//-phonemes.length;//(phonemes.length+1);
 			scores.add(score);
-			System.out.println(words.get(i) + " : " + score);
+			//System.out.println(words.get(i) + " : " + score);
 		}
 		return scores;
 	}
 	
 	public int testOne(ArrayList<String> words, Matrix feats, int numFeats) throws IOException{
-		String path = "an4/models/ph_cont20/";
+		String path = "an4/models/ph_cont50/";
 		initialize(numFeats, path);
 		ArrayList<Double>scores = score(words, feats, numFeats);
 		double maxsc = scores.get(0);
@@ -109,11 +109,11 @@ public class PhonemeHmmTester {
 		return maxk;
 	}
 	
-	public void test(ArrayList<String> words, ArrayList<Matrix> feats, ArrayList<String> ids, int numFeats) throws IOException{
-		String path = "an4/models/ph_cont10/";
-		BufferedWriter ofi = new BufferedWriter(new FileWriter("an4/etc/an4_test10.scores"));
+	public void test(ArrayList<String> words, ArrayList<Matrix> feats, ArrayList<String> ids, int numFeats, ArrayList<String> fullwords ) throws IOException{
+		String path = "aurora/models/ph_cont/";
+		BufferedWriter ofi = new BufferedWriter(new FileWriter("aurora/etc/aurora_test_8000.scores"));
 		initialize(numFeats, path);
-		int correct = 0;
+		double correct = 0;
 		System.out.println("ID, Gold, Recognized");
 		for (int idx=0; idx<feats.size();idx++){
 			Matrix m = feats.get(idx);
@@ -133,7 +133,9 @@ public class PhonemeHmmTester {
 			if (maxk == idx){
 				correct++;
 			}
-			System.out.println(ids.get(idx)+", \""+words.get(idx)+"\", \""+words.get(maxk)+"\"");
+			System.out.println(ids.get(idx)+", \""+fullwords.get(idx)+"\", \""+fullwords.get(maxk)+"\"");
+			System.out.println("Scores"+", "+scores.get(idx)+", "+scores.get(maxk));
+			System.out.println();
 		}
 		ofi.close();
 		double acc = correct/feats.size();

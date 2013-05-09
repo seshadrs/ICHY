@@ -188,17 +188,21 @@ public class HMM {
 	public double Score (Matrix m){
 		
 		double [][] trellis = new double[m.getRowDimension()][numStates];
+		double bestp = 0;
+		double cp = 0;
+		double ep = 0;
 		
 		// at t=0, in state 0
-		trellis[0][0] = Math.log10(getEmmitProb(m, 0, states[0]));
+		ep = getEmmitProb(m, 0, states[0]);
+		if (ep != 0)
+			trellis[0][0] = Math.log10(ep);
+		else
+			trellis[0][0] = 0;
 		//System.out.println(trellis[0][0]);
 		for (int i=1; i<trellis[0].length;i++){
 			trellis[0][i] = 0;
 		}
 		
-		double bestp = 0;
-		double cp = 0;
-		double ep = 0;
 		for(int i=1;i<trellis.length;i++){
 			for (int j=0;j<trellis[0].length;j++){
 				ep = getEmmitProb(m, i, states[j]);
@@ -207,12 +211,27 @@ public class HMM {
 				else
 					ep = Math.log10(ep);
 				//System.out.println("ep: " + ep);
-				bestp = trellis[i-1][j]+Math.log10(transitions[j][j])+ep;
+				if (transitions[j][j] != 0)
+					bestp = trellis[i-1][j]+Math.log10(transitions[j][j])+ep;
+				else{
+					bestp = Double.NEGATIVE_INFINITY;
+					//System.out.println("Trans is 0");
+				}
+				/*if (bestp == Double.NEGATIVE_INFINITY)
+					bestp = 0;*/
 				if(j != 0){
-					cp = trellis[i-1][j-1]+Math.log10(transitions[j-1][j])+ep;
+					if (transitions[j][j] != 0)
+						cp = trellis[i-1][j-1]+Math.log10(transitions[j-1][j])+ep;
+					else{
+						cp = Double.NEGATIVE_INFINITY;
+						//System.out.println("Trans is 0");
+					}
 					if (cp > bestp){
 						bestp = cp;
-					}	
+					}
+					/*if (cp == Double.NEGATIVE_INFINITY)
+						cp = 0;
+					bestp += cp;*/
 				}
 				trellis[i][j] = bestp;
 				//System.out.println("best: " + bestp);

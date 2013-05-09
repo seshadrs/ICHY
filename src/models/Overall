@@ -4,3 +4,4 @@ For each digit:
 	Send vectors to KMeans for segmentation
 	Send segmented vectors and learnt gaussian states to HMM
 	Learn transition probs and train HMM
+	

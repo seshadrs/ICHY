@@ -303,4 +303,19 @@ public class HMM {
 			
 		}
 	}
+	
+	
+	public static double getEmissionProb(Matrix m, int row, Gaussian clus){
+		double dist = 1.0;
+		double sumi = 0;
+		for (int i = 0; i < 39; i++){
+			sumi = (Math.pow((m.get(row, i) - clus.getMeans()[i]), 2)/(clus.getCovars()[i]));
+			sumi = Math.exp(-0.5*sumi)*Math.pow(2*3.14*clus.getCovars()[i], -0.5);
+			dist *= sumi;
+		}
+		return dist;
+	}
+	
+	
+	
 }

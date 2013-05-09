@@ -16,8 +16,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
-import javax.media.jai.operator.MaxDescriptor;
-
 import models.LM;
 import models.phoneme.Gaussian;
 import models.phoneme.HMM;

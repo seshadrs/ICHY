@@ -120,8 +120,8 @@ public class LM {
 			context=prevWords[i]+" "+context;
 		context=context.trim();
 		//System.out.println(probability(context, word));
-		//return Math.log10(Math.exp(5* Math.log(Math.pow(probability(context, word),10))));
-		return probability(context, word);
+		return Math.log10(Math.exp(10* Math.log(Math.pow(probability(context, word),10))));
+		//return probability(context, word);
 	}
 
 	public static Double getDummyProbability(String context, String word) {

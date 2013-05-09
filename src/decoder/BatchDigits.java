@@ -1,5 +1,12 @@
 package decoder;
 
+
+/* 
+ * Does batch decoding of digits data with Phone models (aurora/an4)
+ * 
+ * */
+
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -113,15 +120,22 @@ public class BatchDigits {
 	
 	public static void main(String[] args) throws IllegalArgumentException, IOException
 	{
+		/*Params
+		 * */
+		String modelFolder = "aurora/ph_cont/";		// "an4/models/ph_cont/"
+		int stateCountPenaltyFactor = 1;
+		boolean verbose = false;
+		
+		
 		BatchDigits b = new BatchDigits();
 		
 		wordToPhones = loadDict("aurora/aurora.dic");					//word -> phoneme
 		phones = loadPhones("aurora/aurora.ph");		//phones
 
-		phoneToModel = loadModels(phones,"aurora/ph_cont/ph_cont/");			//phone -> HMM
-		//~ phoneToModel = loadModels(phones,"an4/models/ph_cont/");			//phone -> HMM	
+		phoneToModel = loadModels(phones,modelFolder);			//phone -> HMM
 		
-		LM.loadLM("data/an4.trigramlm");
+		
+		LM.loadLM("an4/etc/an4.trigramlm");
 		
 		
 		HashMap<String, String> transcriptions = new HashMap<String, String>();
@@ -295,8 +309,8 @@ public class BatchDigits {
 					}
 					
 					if((trellis[i][cols-1]==Double.NEGATIVE_INFINITY || (cols%5==0 && trellis[i][cols-1] 
-							+ curWord.lmProb 
-							- 1 * states.size() 
+							//+ curWord.lmProb 
+							- stateCountPenaltyFactor * states.size() 
 							<  1.1 * bestProb)) && bestProb != Double.NEGATIVE_INFINITY)
 					{
 						//System.out.println("breaking");
@@ -314,8 +328,8 @@ public class BatchDigits {
 				//observe final Prob, remember if best
 				
 				Double uttProb = trellis[states.size()][cols-1]	//AM-score 
-								  + curWord.lmProb				//LM-score
-								 - 1 * states.size();
+								  // + curWord.lmProb				//LM-score
+								 - stateCountPenaltyFactor * states.size();
 				if( uttProb  > bestProb)
 					{
 						bestProb = uttProb;
@@ -323,7 +337,8 @@ public class BatchDigits {
 						//System.out.println(bestMatch+" at "+bestProb);
 					}
 				
-				//System.out.println("Utt "+uttNumber+" "+id+":\t"+"EOW : "+curWord.context+" "+curWord.val+" -> "+ uttProb);	
+				if (verbose)
+					System.out.println("Utt "+uttNumber+" "+id+":\t"+"EOW : "+curWord.context+" "+curWord.val+" -> "+ uttProb);	
 				
 				if ((curWord.context+" "+curWord.val).replace("<s>", "").trim().compareTo(transcriptions.get(id).trim())==0)
 					actualProb = uttProb;

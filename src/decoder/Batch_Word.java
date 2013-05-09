@@ -346,7 +346,7 @@ public class Batch_Word {
 				//observe final Prob, remember if best
 				
 				Double uttProb = trellis[states.size()][cols-1]	//AM-score 
-								  // + curWord.lmProb				//LM-score
+								  + curWord.lmProb				//LM-score
 								 - stateCountPenaltyFactor * states.size();
 				if( uttProb  > bestProb)
 					{

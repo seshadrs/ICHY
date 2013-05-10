@@ -1,0 +1,21 @@
+WER:  0.8116254for Param lmweight= 4.0 , insertionPenalty=0.0
+WER:	0.80516684for Param lmweight= 4.0 , insertionPenalty=5.0
+WER:	0.81054896for Param lmweight= 4.0 , insertionPenalty=10.0
+WER:	0.8202368for Param lmweight= 4.0 , insertionPenalty=15.0
+WER:	0.78579116for Param lmweight= 8.0 , insertionPenalty=0.0
+WER:	0.803014for Param lmweight= 8.0 , insertionPenalty=5.0
+WER:	0.8202368for Param lmweight= 8.0 , insertionPenalty=10.0
+WER:	0.8320775for Param lmweight= 8.0 , insertionPenalty=15.0
+WER:	0.795479for Param lmweight= 12.0 , insertionPenalty=0.0
+WER:	0.7997847for Param lmweight= 12.0 , insertionPenalty=5.0
+WER:	0.82131326for Param lmweight= 12.0 , insertionPenalty=10.0
+WER:	0.8245425for Param lmweight= 12.0 , insertionPenalty=15.0
+WER:	0.81054896for Param lmweight= 16.0 , insertionPenalty=0.0
+WER:	0.80947256for Param lmweight= 16.0 , insertionPenalty=5.0
+WER:	0.8159311for Param lmweight= 16.0 , insertionPenalty=10.0
+WER:	0.8202368for Param lmweight= 16.0 , insertionPenalty=15.0
+WER:	0.8148547for Param lmweight= 20.0 , insertionPenalty=0.0
+WER:	0.8159311for Param lmweight= 20.0 , insertionPenalty=5.0
+WER:	0.81054896for Param lmweight= 20.0 , insertionPenalty=10.0
+WER:	0.8202368for Param lmweight= 20.0 , insertionPenalty=15.0
+BEST WER = 	0.7857911586761475

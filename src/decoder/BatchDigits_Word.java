@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
-import javax.media.jai.operator.MaxDescriptor;
+
 
 import models.LM;
 import models.phoneme.Gaussian;
@@ -192,7 +192,7 @@ public class BatchDigits_Word {
 			Matrix mat = new Matrix(featVectors);
 			
 			//!!! int maxDepth=1; //3 words
-			int maxDepth = transcriptions.get(id).split(" ").length;	//limit the depth it traverses
+			int maxDepth = transcriptions.get(id).split(" ").length+1;	//limit the depth it traverses
 			
 			int rows = maxDepth*1000*3 +1, cols= featVectors.length +1;
 			double[][] trellis = new double[rows][cols];

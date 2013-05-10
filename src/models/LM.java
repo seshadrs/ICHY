@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -11,6 +12,7 @@ public class LM {
 	
 	private static Map conditionalProbs = new HashMap<String,Double>();
 	private static Map backoffProbs = new HashMap<String,Double>();
+	private static Set valid = new HashSet<String>();
 	
 	public static void loadLM(String filename) throws IOException
 	{
@@ -25,6 +27,7 @@ public class LM {
 			conditionalProbs.put(splits[1], Double.parseDouble(splits[0]));
 			if (splits.length==3)
 				backoffProbs.put(splits[1], Double.parseDouble(splits[2]));
+			valid.add(splits[1]);
 		}
 		br.close();
 	}
@@ -127,6 +130,20 @@ public class LM {
 	public static Double getDummyProbability(String context, String word) {
 		// TODO Auto-generated method stub
 		return 0.0;
+	}
+	
+	public static boolean isValid(String utt)
+	{
+		String[] words = utt.split(" ");
+		int wlen = words.length;
+		if (wlen>=2)
+			{
+				String bigram = (words[wlen-2]+" "+words[wlen-1]).trim();
+				if (valid.contains(bigram))
+					return true;
+			}
+		
+		return false;
 	}
 
 }

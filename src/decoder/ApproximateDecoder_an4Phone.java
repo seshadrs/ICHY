@@ -20,7 +20,7 @@ import models.LM;
 import models.phoneme.Gaussian;
 import models.phoneme.HMM;
 
-public class ApproximateDecoder_an4Word {
+public class ApproximateDecoder_an4Phone {
 	
 	
 	public class State
@@ -47,7 +47,7 @@ public class ApproximateDecoder_an4Word {
 			this.prevWord = "";
 			this.history = "";
 			
-			this.ancestors = new ArrayList<ApproximateDecoder_an4Word.State>();
+			this.ancestors = new ArrayList<ApproximateDecoder_an4Phone.State>();
 		}
 		
 		private void reset()
@@ -67,16 +67,16 @@ public class ApproximateDecoder_an4Word {
 	public static void main(String[] args) throws IOException
 	{
 		/* CONTROL FILES */
-		String wordDictionaryPath = "an4/etc/an4.wdic";
-		String phoneListPath = "an4/etc/an4.vocab";
-		String acousticModelPath = "an4/models/wo_cont_6states/";
+		String wordDictionaryPath = "an4/etc/an4.dic";
+		String phoneListPath = "an4/etc/an4.phone";
+		String acousticModelPath = "an4/models/ph_cont_better/";
 		String languageModelPath = "an4/etc/an4.trigramlm";
 		String transcriptionFilePath = "an4/etc/an4_test.transcription";
 		String testFilesListPath = "an4/etc/an4_test.fileids";
 		
 		/* PARAMETERS */
-		double lmLProbWeight = 1.0;
-		double insertionPenaltyLProbPerWord = 0.0; 
+		double lmLProbWeight = 7.0;
+		double insertionPenaltyLProbPerWord = 3.0; 
 		
 		/* LOAD DICTIONARIES, MODELS */
 		wordToPhones = Utils.loadDict(wordDictionaryPath);				//word -> phoneme
@@ -84,24 +84,23 @@ public class ApproximateDecoder_an4Word {
 		phoneToModel = Utils.loadModels(phones,acousticModelPath);		//phone -> HMM
 		LM.loadLM(languageModelPath);									//Language Model
 		
-		
 		double bestWER = Double.POSITIVE_INFINITY;
 		for(lmLProbWeight = 4; lmLProbWeight <= 20; lmLProbWeight+=4)
 			for(insertionPenaltyLProbPerWord = 0; insertionPenaltyLProbPerWord <= 15; insertionPenaltyLProbPerWord+=5)
 			{
 				System.out.println("\nParam lmweight= "+lmLProbWeight+" , insertionPenalty="+insertionPenaltyLProbPerWord);
 				
-				ApproximateDecoder_an4Word decoder = new ApproximateDecoder_an4Word();			//decoder obj
+				ApproximateDecoder_an4Phone decoder = new ApproximateDecoder_an4Phone();			//decoder obj
 				
 				WordSequenceAligner werEval = new WordSequenceAligner();							//word seq aligner
 				List<Alignment> alignments = new ArrayList<WordSequenceAligner.Alignment>();		//list of all alignments
 				Alignment alignment;
-		
-				ArrayList<State> states= new ArrayList<ApproximateDecoder_an4Word.State>();		//list of all decoder states
+				
+				ArrayList<State> states= new ArrayList<ApproximateDecoder_an4Phone.State>();		//list of all decoder states
 				
 				/* ADD STATES FOR WORDS : BEGIN_SIL, VOCAB WORDS, END_SIL */
-				ApproximateDecoder_an4Word.State newState;
-				ApproximateDecoder_an4Word.State prevStateInWord;
+				State newState;
+				State prevStateInWord;
 				HMM hmm;
 				Gaussian[] gaussians;
 				double[][] transitions;
@@ -266,7 +265,7 @@ public class ApproximateDecoder_an4Word {
 					trellis = new double[rows][cols];					//allocate the search trellis
 					State curState, bestAncestor=null;
 					String trigramContext;
-					double ancestorLProb, candidateLProb, bestLProb, emissionLProb;
+					double ancestorLProb, candidateLProb, bestLProb, emissionLProb, LMLProb;
 					
 					trellis[0][0] = 0.0;								//very first state (has to be silence)
 					for(int i=1;i<rows;i++)
@@ -288,7 +287,9 @@ public class ApproximateDecoder_an4Word {
 									if(curState.isFirstStateInword && curState.index != ancestor.index)
 									{
 										trigramContext = ancestor.prevWord+" "+ancestor.word;
-										candidateLProb = ancestorLProb + lmLProbWeight*LM.probability(trigramContext, curState.word) - insertionPenaltyLProbPerWord + Math.log10(1.0-ancestor.selfProb) + emissionLProb;
+										LMLProb = LM.probability(trigramContext, curState.word);
+										// System.out.println(trigramContext +" | "+ curState.word +"\t"+LMLProb);
+										candidateLProb = ancestorLProb + lmLProbWeight*LMLProb - insertionPenaltyLProbPerWord + Math.log10(1.0-ancestor.selfProb) + emissionLProb;
 									}
 									else if(curState.index == ancestor.index)
 									{
@@ -347,15 +348,14 @@ public class ApproximateDecoder_an4Word {
 					uttNumber+=1;
 				}
 				
+				
 				SummaryStatistics ss = werEval.new SummaryStatistics(alignments);
 				System.out.println("WER:\t"+ss.getWordErrorRate()+"for Param lmweight= "+lmLProbWeight+" , insertionPenalty="+insertionPenaltyLProbPerWord);
 				if(ss.getWordErrorRate()<bestWER)
 					bestWER=ss.getWordErrorRate();
 			}	
 		
-			System.out.println("BEST WER = \t"+bestWER);
-		
-		
+		System.out.println("BEST WER = \t"+bestWER);
 		
 	}
 	
